@@ -93,3 +93,24 @@ const GameController = (function(){
         }
     };
 })();
+
+const DisplayController = (function(){
+    return{
+        renderBoard(){
+            const displayBoard = document.getElementById('displayBoard');
+            displayBoard.innerHTML = '';
+            
+            const board = Gameboard.getBoard();
+            board.forEach((cell, index) => {
+                const div = document.createElement('div');
+                div.classList.add('cell');
+                div.innerText = cell;
+                div.addEventListener('click', () => {
+                    GameController.playTurn(index);
+                    DisplayController.renderBoard();
+                });
+                displayBoard.appendChild(div);
+            });
+        }
+    };
+})();
