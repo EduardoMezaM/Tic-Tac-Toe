@@ -22,3 +22,74 @@ function Player(name, marker){
         }
     };
 }
+
+const GameController = (function(){
+    const player1 = Player('player1', 'x');
+    const player2 = Player('player2', 'o');
+    let currentPlayer = player1;
+
+    function switchTurn(){
+        currentPlayer = currentPlayer === player1? player2 : player1;
+        console.log(`It's now ${currentPlayer.name}'s turn.`);
+    }
+
+    return{
+        playTurn(index){
+            const board = Gameboard.getBoard();
+            if(board[index] === ''){
+                board[index] =  currentPlayer.marker;
+                
+                if(checkWin()){
+                    console.log(`${currentPlayer.name} wins!`);
+                }
+                else if(checkTie()){
+                    console.log("It's a tie!");
+                }
+                else {
+                    switchTurn();
+                }
+            }
+            else{
+                console.log('Spot already filled!');
+            }
+        },
+        printBoard(){
+            Gameboard.logBoard();
+        },
+        getCurrentPlayer(){
+            return currentPlayer;
+        },
+        checkWin(){
+            const board = Gameboard.getBoard();
+            const winConditions = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8],
+                [0, 3, 6], [1, 4, 7], [2, 5, 8],
+                [0, 4, 8], [2, 4, 6]
+            ];
+
+            for(const condition of winConditions){
+                const [a, b, c] = condition;
+                if (
+                    board[a] !== '' &&
+                    board[a] === board[b] &&
+                    board[a] === board[c]
+                ){
+                    return true;
+                }
+            }
+            return false;
+        },
+        checkTie(){
+            const board = Gameboard.getBoard();
+            const isBoardFull = board.every(cell => cell !== '');
+            return isBoardFull && !GameController.checkWin();
+        },
+        resetGame(){
+            const board = Gameboard.getBoard();
+            for(let i = 0; i < board.length; i++){
+                board[i] = '';
+            }
+            currentPlayer = player1;
+        }
+    };
+})();
