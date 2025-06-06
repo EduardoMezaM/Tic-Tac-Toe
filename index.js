@@ -39,10 +39,10 @@ const GameController = (function(){
             if(board[index] === ''){
                 board[index] =  currentPlayer.marker;
                 
-                if(checkWin()){
+                if(GameController.checkWin()){
                     console.log(`${currentPlayer.name} wins!`);
                 }
-                else if(checkTie()){
+                else if(GameController.checkTie()){
                     console.log("It's a tie!");
                 }
                 else {
@@ -114,3 +114,6 @@ const DisplayController = (function(){
         }
     };
 })();
+
+const startBtn = document.querySelector('.startBtn');
+startBtn.addEventListener('click', () => DisplayController.renderBoard());
