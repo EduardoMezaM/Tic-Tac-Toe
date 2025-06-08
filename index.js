@@ -9,6 +9,9 @@ const Gameboard = (function(){
             for (let i = 0; i < board.length; i += 3){
                 console.log(board.slice(i, i + 3).join(' | '));
             }
+        },
+        resetBoard(){
+            board = ['', '', '', '', '', '', '', '', ''];
         }
     };
 })();
@@ -24,13 +27,19 @@ function Player(name, marker){
 }
 
 const GameController = (function(){
-    const player1 = Player('player1', 'x');
-    const player2 = Player('player2', 'o');
-    let currentPlayer = player1;
+    let player1, player2;
+    let currentPlayer;
 
     function switchTurn(){
         currentPlayer = currentPlayer === player1? player2 : player1;
-        console.log(`It's now ${currentPlayer.name}'s turn.`);
+        DisplayController.updateMessage(`${currentPlayer.name}'s turn (${currentPlayer.marker})`);
+    }
+
+    function resetPlayers(name1, name2) {
+        player1 = Player(name1, 'O');
+        player2 = Player(name2, 'X');
+        currentPlayer = player1;
+        DisplayController.updateMessage(`${currentPlayer.name}'s turn (${currentPlayer.marker})`);
     }
 
     return{
@@ -40,10 +49,10 @@ const GameController = (function(){
                 board[index] =  currentPlayer.marker;
                 
                 if(GameController.checkWin()){
-                    console.log(`${currentPlayer.name} wins!`);
+                    DisplayController.updateMessage(`${currentPlayer.name} wins!`);
                 }
                 else if(GameController.checkTie()){
-                    console.log("It's a tie!");
+                    DisplayController.updateMessage(`It's a tie!`);
                 }
                 else {
                     switchTurn();
@@ -90,6 +99,11 @@ const GameController = (function(){
                 board[i] = '';
             }
             currentPlayer = player1;
+        },
+        startNewGame(name1, name2) {
+            Gameboard.resetBoard();
+            resetPlayers(name1, name2);
+            DisplayController.renderBoard();
         }
     };
 })();
@@ -111,9 +125,18 @@ const DisplayController = (function(){
                 });
                 displayBoard.appendChild(div);
             });
+        },
+        updateMessage(text){
+            document.getElementById('message').textContent = text;
         }
     };
 })();
 
-const startBtn = document.querySelector('.startBtn');
+const startBtn = document.querySelector('#startBtn');
 startBtn.addEventListener('click', () => DisplayController.renderBoard());
+
+document.getElementById('startBtn').addEventListener('click', () => {
+    const name1 = prompt('Enter name for Player 1 (O):') || 'Player 1';
+    const name2 = prompt('Enter name for Player 2 (X):') || 'Player 2';
+    GameController.startNewGame(name1, name2);
+});
