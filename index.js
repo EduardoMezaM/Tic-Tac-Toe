@@ -29,6 +29,8 @@ function Player(name, marker){
 const GameController = (function(){
     let player1, player2;
     let currentPlayer;
+    let winningCombo = [];
+    let gameover = false;
 
     function switchTurn(){
         currentPlayer = currentPlayer === player1? player2 : player1;
@@ -44,11 +46,14 @@ const GameController = (function(){
 
     return{
         playTurn(index){
+            if(gameover) return;
             const board = Gameboard.getBoard();
             if(board[index] === ''){
                 board[index] =  currentPlayer.marker;
+                DisplayController.renderBoard();
                 
                 if(GameController.checkWin()){
+                    DisplayController.highlightCells(winningCombo);
                     DisplayController.updateMessage(`${currentPlayer.name} wins!`);
                 }
                 else if(GameController.checkTie()){
@@ -83,6 +88,8 @@ const GameController = (function(){
                     board[a] === board[b] &&
                     board[a] === board[c]
                 ){
+                    winningCombo = condition;
+                    gameover = true;
                     return true;
                 }
             }
@@ -94,13 +101,14 @@ const GameController = (function(){
             return isBoardFull && !GameController.checkWin();
         },
         resetGame(){
-            const board = Gameboard.getBoard();
-            for(let i = 0; i < board.length; i++){
-                board[i] = '';
-            }
+            Gameboard.resetBoard();
+            DisplayController.renderBoard();
             currentPlayer = player1;
+            gameover = false;
+            DisplayController.updateMessage(`${currentPlayer.name}'s turn (${currentPlayer.marker})`);
         },
         startNewGame(name1, name2) {
+            gameover = false;
             Gameboard.resetBoard();
             resetPlayers(name1, name2);
             DisplayController.renderBoard();
@@ -119,15 +127,28 @@ const DisplayController = (function(){
                 const div = document.createElement('div');
                 div.classList.add('cell');
                 div.innerText = cell;
+                if (cell === 'X') div.classList.add('x-cell');
+                if (cell === 'O') div.classList.add('o-cell');
                 div.addEventListener('click', () => {
                     GameController.playTurn(index);
-                    DisplayController.renderBoard();
                 });
                 displayBoard.appendChild(div);
             });
+            const resetBtn = document.createElement('button');
+            resetBtn.innerText = 'Reset'
+            resetBtn.classList.add('resetBtn');
+            resetBtn.addEventListener('click', () => GameController.resetGame())
+            displayBoard.appendChild(resetBtn);
         },
         updateMessage(text){
             document.getElementById('message').textContent = text;
+        },
+        highlightCells(indices){
+            const displayBoard = document.getElementById('displayBoard');
+             const cells = displayBoard.querySelectorAll('.cell');
+             indices.forEach(i => {
+                cells[i].classList.add('win');
+            });
         }
     };
 })();
